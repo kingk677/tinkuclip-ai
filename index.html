@@ -1,0 +1,34 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TinkuClip AI</title><style>
+*{box-sizing:border-box}body{margin:0;background:#090b18;color:#f4f5ff;font-family:Arial,sans-serif}.wrap{max-width:760px;margin:auto;padding:22px 16px 50px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}.logo{font-size:22px;font-weight:800}.logo span{color:#38bdf8}.badge{font-size:11px;color:#c4b5fd;border:1px solid #59459b;background:#241b45;padding:7px 10px;border-radius:20px}
+.hero{text-align:center;margin:28px 0}.hero h1{font-size:32px;margin:0 0 10px}.hero em{font-style:normal;background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;color:transparent}.hero p,.muted{color:#a6acc8;line-height:1.55;font-size:14px}
+.card{background:linear-gradient(160deg,#171b35,#101428);border:1px solid #2a3154;border-radius:19px;padding:18px;margin:15px 0}.label{display:block;font-weight:700;margin-bottom:12px}
+input,select{width:100%;padding:14px;border:1px solid #30395f;border-radius:11px;background:#0b1021;color:white;font-size:14px}input[type=file]{padding:12px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:12px;color:#a6acc8;margin-bottom:7px}
+button{width:100%;border:0;border-radius:12px;padding:15px;margin-top:16px;background:linear-gradient(90deg,#7c3aed,#2563eb);color:white;font-size:16px;font-weight:800}
+.note{background:#10172b;border-left:3px solid #38bdf8;padding:12px;border-radius:8px;color:#c5cbe3;font-size:12px;line-height:1.55;margin-top:13px}
+#status{display:none;background:#172344;padding:12px;border-radius:10px;margin-top:13px;font-size:13px;line-height:1.5}#results a{display:block;color:#93c5fd;margin:12px 0}.progress{height:7px;background:#252c49;border-radius:9px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:linear-gradient(90deg,#8b5cf6,#38bdf8)}
+@media(max-width:430px){.hero h1{font-size:27px}.card{padding:15px}.row{gap:8px}}
+</style></head><body><main class="wrap">
+<header><div class="logo">✂ TinkuClip <span>AI</span></div><div class="badge">SHORTS STUDIO</div></header>
+<section class="hero"><h1>Long video se <em>Shorts</em> banao</h1><p>Upload video • Vertical 9:16 clips • MP4 downloads</p></section>
+<section class="card"><label class="label">1. Apna video upload karein</label><input id="video" type="file" accept="video/*">
+<p class="muted">Is starter version mein upload se clipping hoti hai. YouTube URL se video download karna supported nahi hai; apni original video file upload karein.</p></section>
+<section class="card"><label class="label">2. Clip settings</label><div class="row">
+<div class="field"><label>Clips ki sankhya</label><select id="clips"><option>3</option><option selected>5</option><option>10</option><option>15</option><option>20</option></select></div>
+<div class="field"><label>Caption language (next version)</label><select id="lang"><option>Hindi</option><option>English</option><option>Hindi + English</option></select></div></div>
+<div class="note">Abhi basic version video ko alag-alag segments mein kaatkar 9:16 crop karta hai. Smart AI highlight selection aur auto captions abhi add nahi hue hain.</div>
+<button id="go" onclick="processVideo()">✨ Generate Clips</button><div id="status"><span id="msg"></span><div class="progress"><div class="bar" id="bar"></div></div></div><div id="results"></div></section>
+<section class="card"><b>Current build</b><p class="muted">Upload-based clip generator. Server resources aur hosting limits ke hisaab se maximum file size/time badal sakta hai.</p></section>
+</main><script>
+async function processVideo(){
+ const f=document.getElementById('video').files[0];if(!f){alert('Pehle video select karein.');return}
+ const status=document.getElementById('status'),msg=document.getElementById('msg'),bar=document.getElementById('bar'),btn=document.getElementById('go'),res=document.getElementById('results');
+ status.style.display='block';res.innerHTML='';btn.disabled=true;btn.textContent='Processing...';msg.textContent='Video upload aur processing chal rahi hai. Ismein waqt lag sakta hai.';bar.style.width='25%';
+ const data=new FormData();data.append('video',f);data.append('clips',document.getElementById('clips').value);data.append('language',document.getElementById('lang').value);
+ try{const r=await fetch('/api/process',{method:'POST',body:data});const j=await r.json();if(!r.ok)throw new Error(j.detail||'Processing failed');bar.style.width='100%';msg.textContent=j.message;
+ j.clips.forEach(c=>{const a=document.createElement('a');a.href=c.url;a.textContent=`⬇ Download ${c.name} (start ${c.start_seconds}s)`;a.download=c.name;res.appendChild(a)})}
+ catch(e){msg.textContent='Error: '+e.message;bar.style.width='0%'}
+ finally{btn.disabled=false;btn.textContent='✨ Generate Clips'}
+}
+</script></body></html>
